@@ -10,7 +10,7 @@
 """
 
 from __future__ import with_statement
-from flask import abort, Flask, g, json, url_for
+from flask import abort, Flask, g, json
 from flaskext.exceptional import Exceptional
 import unittest
 

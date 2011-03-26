@@ -36,12 +36,12 @@ application, configure the Exceptional API key, and create the
 
 Your application is configured for cloud-based error monitoring! Check out
 the following section for more detail on the available Flask-Exceptional
-configuration keys.
+configuration settings.
 
 Configuration
 -------------
 
-The following configuration keys exist for Flask-Exceptional:
+The following configuration settings exist for Flask-Exceptional:
 
 =================================== ======================================
 `EXCEPTIONAL_API_KEY`               The Exceptional API key for your
@@ -55,16 +55,16 @@ The following configuration keys exist for Flask-Exceptional:
                                     result in a logged warning, but the
                                     app will continue to run as normal.
 `EXCEPTIONAL_DEBUG_URL`             If your app is running in debug mode,
-                                    errors are not published to
+                                    errors are not tracked with
                                     Exceptional. Configure this value to
                                     capture error data in debug mode. For
                                     example, you may use a `PostBin`_ URL
                                     to debug your application. JSON error
-                                    data is sent uncompressed, whereas
-                                    Exceptional requires the data to be
-                                    compressed.
+                                    data is POSTed uncompressed to this
+                                    URL, whereas Exceptional requires the
+                                    data to be compressed.
 `EXCEPTIONAL_HTTP_CODES`            A list of codes for HTTP errors that
-                                    will be published to Exceptional.
+                                    will be tracked with Exceptional.
                                     
                                     Defaults to standard HTTP 4xx codes.
 `EXCEPTIONAL_PARAMETER_FILTER`      A list of values to filter from the

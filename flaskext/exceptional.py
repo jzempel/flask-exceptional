@@ -9,9 +9,10 @@
     :license: BSD, see LICENSE for more details.
 """
 
+from __future__ import with_statement
 from Cookie import SimpleCookie
 from datetime import datetime
-from flask import _request_ctx_stack, g, json
+from flask import _request_ctx_stack, Config, Flask, g, json
 from functools import wraps
 from re import match
 from urllib2 import Request, urlopen
@@ -24,12 +25,11 @@ import sys
 EXCEPTIONAL_URL = "http://api.getexceptional.com/api/errors"
 
 class Exceptional(object):
-    """Extension for publishing application errors to Exceptional.
-    Errors are not published to Exceptional if DEBUG is True. The
-    application will log a warning if no ``EXCEPTIONAL_API_KEY``
-    has been configured.
+    """Extension for tracking application errors with Exceptional.
+    Errors are not tracked if DEBUG is True. The application will
+    log a warning if no ``EXCEPTIONAL_API_KEY`` has been configured.
     
-    :param app: Default None. The Flask application to publish errors
+    :param app: Default None. The Flask application to track errors
                 for. If the app is not provided on creation, then it
                 can be provided later via :meth:`init_app`.
     """
@@ -56,7 +56,7 @@ class Exceptional(object):
     def init_app(self, app):
         """Initialize this Exceptional extension.
         
-        :param app: The Flask application to publish errors for.
+        :param app: The Flask application to track errors for.
         """
         self.app = app
         
@@ -94,6 +94,42 @@ class Exceptional(object):
             }
         else:
             app.logger.warning("Missing 'EXCEPTIONAL_API_KEY' configuration.")
+    
+    @staticmethod
+    def test(config):
+        """Test the given Flask configuration. If configured correctly,
+        an error will be tracked by Exceptional for your app. Unlike
+        the initialized extension, this test will post data to Exceptional,
+        regardless of the configured ``DEBUG`` setting.
+        
+        :param config: The Flask application configuration object to test.
+                       Accepts either :class:`flask.Config` or the object
+                       types allowed by :meth:`flask.Config.from_object`.
+        """
+        app = Flask(__name__)
+        exceptional = Exceptional()
+        
+        if isinstance(config, Config):
+            app.config = config
+        else:
+            app.config.from_object(config)
+        
+        assert "EXCEPTIONAL_API_KEY" in app.config
+        app.debug = False
+        app.testing = False
+        exceptional.init_app(app)
+        app.testing = True
+        
+        @app.route("/exception")
+        def exception():
+            message = "Congratulations! Your application is configured \
+                       for Exceptional error tracking."
+                
+            raise Exception(message)
+        
+        with app.test_client() as client:
+            client.get("/exception")
+            json.loads(g.exceptional)
     
     def _get_exception_handler(self):
         """Get a wrapped exception handler. Returns a handler that can be

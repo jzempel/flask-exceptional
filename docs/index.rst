@@ -34,9 +34,14 @@ application, configure the Exceptional API key, and create the
     app.config["EXCEPTIONAL_API_KEY"] = "exceptional_forty_character_unique_key"
     exceptional = Exceptional(app)
 
-Your application is configured for cloud-based error monitoring! Check out
-the following section for more detail on the available Flask-Exceptional
-configuration settings.
+Your application is configured for cloud-based error monitoring! You can
+verify your configuration is working by calling the
+:meth:`Exceptional.test` method::
+
+    Exceptional.test(app.config)
+
+Check out the following section for more detail on the available
+Flask-Exceptional configuration settings.
 
 Configuration
 -------------

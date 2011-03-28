@@ -142,8 +142,7 @@ class Exceptional(object):
         @wraps(handle_exception)
         def ret_val(exception):
             context = _request_ctx_stack.top
-            traceback = tbtools.get_current_traceback()
-            self._post_data(context, traceback)
+            self._post_data(context)
             
             return handle_exception(exception)
         
@@ -162,21 +161,20 @@ class Exceptional(object):
             context = _request_ctx_stack.top
             
             if exception.code in context.app.config["EXCEPTIONAL_HTTP_CODES"]:
-                traceback = tbtools.get_current_traceback()
-                self._post_data(context, traceback)
+                self._post_data(context)
             
             return handle_http_exception(exception)
         
         return ret_val
     
-    def _post_data(self, context, traceback):
+    def _post_data(self, context):
         """POST data to the the Exceptional API. If DEBUG is True then data is
         sent to ``EXCEPTIONAL_DEBUG_URL`` if it has been defined. If TESTING is
         true, error data is stored in the global ``flask.g.exceptional`` variable.
         
         :param context: The current application context.
-        :param traceback: The current exception traceback.
         """
+        traceback = tbtools.get_current_traceback()
         data = json.dumps({
             "application_environment": self.__get_application_data(context.app),
             "client": context.app.extensions["exceptional"],

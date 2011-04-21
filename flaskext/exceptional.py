@@ -15,7 +15,7 @@ from datetime import datetime
 from flask import _request_ctx_stack, Config, Flask, g, json
 from functools import wraps
 from re import match
-from urllib2 import Request, urlopen
+from urllib2 import Request, urlopen, HTTPError, URLError
 from werkzeug import Headers
 from werkzeug.debug import tbtools
 from zlib import compress
@@ -23,6 +23,7 @@ import os
 import sys
 
 EXCEPTIONAL_URL = "http://api.getexceptional.com/api/errors"
+EXCEPTIONAL_TIMEOUT = 5
 
 class Exceptional(object):
     """Extension for tracking application errors with Exceptional.
@@ -175,11 +176,13 @@ class Exceptional(object):
         :param context: The current application context.
         """
         traceback = tbtools.get_current_traceback()
+        exception_data = self.__get_exception_data(traceback)
+
         data = json.dumps({
             "application_environment": self.__get_application_data(context.app),
             "client": context.app.extensions["exceptional"],
             "request": self.__get_request_data(context.app, context.request, context.session),
-            "exception": self.__get_exception_data(traceback)
+            "exception": exception_data
         })
         
         if context.app.testing:
@@ -190,11 +193,14 @@ class Exceptional(object):
             request.add_header("Content-Type", "application/json")
             
             if not context.app.debug:
-                request.add_header("Content-Encoding", "deflate")    
-                data = compress(data, 1)
-            
-            urlopen(request, data)
-    
+                request.add_header("Content-Encoding", "deflate")
+            try:
+                urlopen(request, compress(data, 1), EXCEPTIONAL_TIMEOUT)
+            except HTTPError, e:
+                self.app.logger.warn('Failed to post message to exceptional(%s).\nOriginal Exception Data:\n%s' % (e, exception_data))
+            except URLError, e:
+                self.app.logger.warn('Failed to post message to exceptional(%s) .\nOriginal Exception Data:\n%s' % (e, exception_data))
+
     @staticmethod
     def __filter(app, data, filter_name):
         """Filter sensitive data.

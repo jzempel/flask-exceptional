@@ -153,11 +153,11 @@ class ExceptionalTestCase(unittest.TestCase):
         assert exceptional.url == self.app.config["EXCEPTIONAL_DEBUG_URL"]
         
         with self.app.test_client() as client:
-            with self.assertRaises(ZeroDivisionError):
+            try:
                 client.get("/error")
-            
-            json.loads(g.exceptional)
-            print "See {0} for HTTP request details.".format(exceptional.url)
+            except ZeroDivisionError:
+                json.loads(g.exceptional)
+                print "See {0} for HTTP request details.".format(exceptional.url)
 
 if __name__ == "__main__":
     unittest.main()

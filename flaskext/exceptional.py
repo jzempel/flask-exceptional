@@ -286,11 +286,12 @@ http://status.getexceptional.com for details. Error data:\n{1}".format(self.url,
                 parameters[key] = value[0].filename
             else:
                 parameters[key] = [file.filename for file in value]
-        
         if request.cookies:
             cookies = Exceptional.__filter(app, request.cookies, "EXCEPTIONAL_COOKIE_FILTER")
             headers = Headers(request.headers) # Get a mutable dictionary.
-            cookie = SimpleCookie(cookies)
+            cookie = SimpleCookie()
+            for k in cookies:
+                cookie[k] = cookies[k]
             headers["Cookie"] = cookie.output(header='', sep=';').strip()
         else:
             headers = request.headers

@@ -13,6 +13,7 @@ from __future__ import with_statement
 from flask import abort, Flask, g, json
 from flaskext.exceptional import Exceptional
 import unittest
+import os
 
 class ExceptionalTestCase(unittest.TestCase):
     """Exceptional extension test cases.
@@ -25,7 +26,7 @@ class ExceptionalTestCase(unittest.TestCase):
         ret_val = Flask(__name__)
         ret_val.testing = True
         ret_val.config["EXCEPTIONAL_API_KEY"] = "key"
-        ret_val.config["EXCEPTIONAL_DEBUG_URL"] = "http://www.postbin.org/m7viy8"
+        ret_val.config["EXCEPTIONAL_DEBUG_URL"] = os.environ.get("EXCEPTIONAL_DEBUG_URL") or "http://www.postbin.org/m7viy8"
     
         @ret_val.route("/error")
         def error():
@@ -152,11 +153,11 @@ class ExceptionalTestCase(unittest.TestCase):
         assert exceptional.url == self.app.config["EXCEPTIONAL_DEBUG_URL"]
         
         with self.app.test_client() as client:
-            with self.assertRaises(ZeroDivisionError):
+            try:
                 client.get("/error")
-            
-            json.loads(g.exceptional)
-            print "See {0} for HTTP request details.".format(exceptional.url)
+            except ZeroDivisionError:
+                json.loads(g.exceptional)
+                print "See {0} for HTTP request details.".format(exceptional.url)
 
 if __name__ == "__main__":
     unittest.main()

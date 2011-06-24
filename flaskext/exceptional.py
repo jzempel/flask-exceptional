@@ -210,7 +210,7 @@ http://status.getexceptional.com for details. Error data:\n{1}".format(self.url,
         if filter:
             ret_val = {}
             
-            for key, value in data.items():
+            for key, value in data.iteritems():
                 for item in filter:
                     if match(item, key):
                         value = "[FILTERED]"
@@ -273,7 +273,7 @@ http://status.getexceptional.com for details. Error data:\n{1}".format(self.url,
         parameters = {}
         form = request.form.to_dict(flat=False)
         
-        for key, value in form.items():
+        for key, value in form.iteritems():
             if len(value) == 1:
                 parameters[key] = value[0]
             else:
@@ -281,17 +281,20 @@ http://status.getexceptional.com for details. Error data:\n{1}".format(self.url,
         
         files = request.files.to_dict(flat=False)
         
-        for key, value in files.items():
+        for key, value in files.iteritems():
             if len(value) == 1:
                 parameters[key] = value[0].filename
             else:
                 parameters[key] = [file.filename for file in value]
+        
         if request.cookies:
             cookies = Exceptional.__filter(app, request.cookies, "EXCEPTIONAL_COOKIE_FILTER")
             headers = Headers(request.headers) # Get a mutable dictionary.
             cookie = SimpleCookie()
-            for k in cookies:
-                cookie[k] = cookies[k]
+            
+            for key, value in cookies.iteritems():
+                cookie[key] = value
+            
             headers["Cookie"] = cookie.output(header='', sep=';').strip()
         else:
             headers = request.headers

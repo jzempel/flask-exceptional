@@ -306,6 +306,6 @@ http://status.getexceptional.com for details. Error data:\n{1}".format(self.url,
             "action": request.endpoint.split('.', 1)[-1] if request.endpoint else None,
             "url": request.url,
             "request_method": request.method,
-            "controller": request.module,
+            "controller": request.blueprint if hasattr(request, "blueprint") else request.module,
             "headers": Exceptional.__filter(app, headers, "EXCEPTIONAL_HEADER_FILTER")
         }

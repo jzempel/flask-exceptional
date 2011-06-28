@@ -28,6 +28,7 @@ class ExceptionalTestCase(unittest.TestCase):
         ret_val.config["EXCEPTIONAL_API_KEY"] = "key"
         ret_val.config["EXCEPTIONAL_DEBUG_URL"] = environ.get("EXCEPTIONAL_DEBUG_URL",
             "http://www.postbin.org/m7viy8")
+        ret_val.config["PROPAGATE_EXCEPTIONS"] = False
         
         @ret_val.route("/error")
         def error():
@@ -149,6 +150,7 @@ class ExceptionalTestCase(unittest.TestCase):
         """Test exception in debug mode.
         """
         self.app.config["EXCEPTIONAL_ENVIRONMENT_FILTER"].append("os.*")
+        self.app.config["PROPAGATE_EXCEPTIONS"] = None
         self.app.debug = True
         exceptional = Exceptional(self.app)
         assert exceptional.url == self.app.config["EXCEPTIONAL_DEBUG_URL"]

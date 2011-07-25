@@ -158,7 +158,7 @@ class ExceptionalTestCase(unittest.TestCase):
         with self.app.test_client() as client:
             self.assertRaises(ZeroDivisionError, client.get, "/error")
             json.loads(g.exceptional)
-            print "See {0} for HTTP request details.".format(exceptional.url)
+            print "See %s for HTTP request details." % exceptional.url
 
 if __name__ == "__main__":
     unittest.main()

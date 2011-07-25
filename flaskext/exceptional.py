@@ -75,7 +75,7 @@ class Exceptional(object):
             elif app.testing:
                 self.url = None
             else:
-                self.url = "{0}?api_key={1}&protocol_version={2}".format(
+                self.url = "%s?api_key=%s&protocol_version=%d" % (
                     EXCEPTIONAL_URL,
                     app.config["EXCEPTIONAL_API_KEY"],
                     protocol_version
@@ -197,8 +197,8 @@ class Exceptional(object):
             try:
                 urlopen(request, data)
             except URLError:
-                message = "Unable to connect to {0}. See \
-http://status.getexceptional.com for details. Error data:\n{1}".format(self.url, error_data)
+                message = "Unable to connect to %s. See \
+http://status.getexceptional.com for details. Error data:\n%s" % (self.url, error_data)
                 self.app.logger.warning(message, exc_info=True)
 
     @staticmethod
@@ -234,7 +234,7 @@ http://status.getexceptional.com for details. Error data:\n{1}".format(self.url,
         
         for name in os.environ:
             value = os.environ[name]
-            environment["os.{0}".format(name)] = value
+            environment["os.%s" % name] = value
         
         return {
             "framework": "flask",
@@ -252,7 +252,7 @@ http://status.getexceptional.com for details. Error data:\n{1}".format(self.url,
         backtrace = []
         
         for frame in traceback.frames:
-            backtrace.insert(0, "File \"{0}\", line {1}, in {2}\n\t{3}".format(
+            backtrace.insert(0, "File \"%s\", line %d, in %s\n\t%s" % (
                 frame.filename,
                 frame.lineno,
                 frame.function_name,

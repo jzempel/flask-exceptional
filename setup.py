@@ -19,7 +19,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Exceptional',
-    version='0.4.1',
+    version='0.4.2',
     url='http://github.com/jzempel/flask-exceptional',
     license='BSD',
     author='Jonathan Zempel',

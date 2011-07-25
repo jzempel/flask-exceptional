@@ -66,7 +66,7 @@ class Exceptional(object):
             app.config.setdefault("EXCEPTIONAL_HEADER_FILTER", None)
             app.config.setdefault("EXCEPTIONAL_PARAMETER_FILTER", None)
             app.config.setdefault("EXCEPTIONAL_SESSION_FILTER", None)
-            app.config.setdefault("EXCEPTIONAL_HTTP_CODES", range(400, 418))
+            app.config.setdefault("EXCEPTIONAL_HTTP_CODES", set(xrange(400, 418)))
             app.config.setdefault("EXCEPTIONAL_DEBUG_URL", None)
             protocol_version = 5 # Using zlib compression.
             

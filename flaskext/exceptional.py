@@ -68,7 +68,7 @@ class Exceptional(object):
             app.config.setdefault("EXCEPTIONAL_SESSION_FILTER", None)
             app.config.setdefault("EXCEPTIONAL_HTTP_CODES", set(xrange(400, 418)))
             app.config.setdefault("EXCEPTIONAL_DEBUG_URL", None)
-            protocol_version = 5 # Using zlib compression.
+            self.__protocol_version = 5 # Using zlib compression.
             
             if app.debug:
                 self.url = app.config["EXCEPTIONAL_DEBUG_URL"]
@@ -78,7 +78,7 @@ class Exceptional(object):
                 self.url = "%s?api_key=%s&protocol_version=%d" % (
                     EXCEPTIONAL_URL,
                     app.config["EXCEPTIONAL_API_KEY"],
-                    protocol_version
+                    self.__protocol_version
                 )
             
             app.handle_exception = self._get_exception_handler()
@@ -87,11 +87,7 @@ class Exceptional(object):
             if not hasattr(app, "extensions"):
                 app.extensions = {}
     
-            app.extensions["exceptional"] = {
-                "name": "flask-exceptional",
-                "version": self.__version__,
-                "protocol_version": protocol_version
-            }
+            app.extensions["exceptional"] = self
         else:
             app.logger.warning("Missing 'EXCEPTIONAL_API_KEY' configuration.")
     
@@ -173,10 +169,15 @@ class Exceptional(object):
         
         :param context: The current application context.
         """
+        client_data = {
+            "name": "flask-exceptional",
+            "version": self.__version__,
+            "protocol_version": self.__protocol_version
+        }
         traceback = tbtools.get_current_traceback()
         error_data = json.dumps({
             "application_environment": self.__get_application_data(context.app),
-            "client": context.app.extensions["exceptional"],
+            "client": client_data,
             "request": self.__get_request_data(context.app, context.request, context.session),
             "exception": self.__get_exception_data(traceback)
         })

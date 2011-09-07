@@ -15,7 +15,7 @@ from datetime import datetime
 from flask import _request_ctx_stack, Config, Flask, g, json
 from functools import wraps
 from re import match
-from urllib2 import Request, urlopen, URLError
+from urllib2 import HTTPError, Request, urlopen, URLError
 from werkzeug import Headers
 from werkzeug.debug import tbtools
 from zlib import compress
@@ -196,7 +196,11 @@ class Exceptional(object):
                 data = compress(error_data, 1)
             
             try:
-                urlopen(request, data)
+                try:
+                    urlopen(request, data)
+                except HTTPError, e:
+                    if e.code >= 400:
+                        raise
             except URLError:
                 message = "Unable to connect to %s. See \
 http://status.getexceptional.com for details. Error data:\n%s" % (self.url, error_data)

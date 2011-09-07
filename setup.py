@@ -14,12 +14,18 @@ Links
 .. _Exceptional: http://www.getexceptional.com/
 
 """
-from setuptools import setup
 
+from setuptools import setup
+from sys import version_info
+
+if version_info < (2, 6):
+    install_requires = ['Flask', 'simplejson']
+else:
+    install_requires = ['Flask']
 
 setup(
     name='Flask-Exceptional',
-    version='0.4.3',
+    version='0.4.4',
     url='http://github.com/jzempel/flask-exceptional',
     license='BSD',
     author='Jonathan Zempel',
@@ -30,9 +36,7 @@ setup(
     namespace_packages=['flaskext'],
     zip_safe=False,
     platforms='any',
-    install_requires=[
-        'Flask'
-    ],
+    install_requires=install_requires,
     test_suite='tests',
     classifiers=[
         'Development Status :: 4 - Beta',

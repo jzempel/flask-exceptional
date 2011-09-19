@@ -149,10 +149,11 @@ class ExceptionalTestCase(unittest.TestCase):
     def test_09_debug(self):
         """Test exception in debug mode.
         """
-        self.app.config["EXCEPTIONAL_ENVIRONMENT_FILTER"].append("os.*")
-        self.app.config["PROPAGATE_EXCEPTIONS"] = None
+        self.app = self.create_application()
         self.app.debug = True
         exceptional = Exceptional(self.app)
+        self.app.config["EXCEPTIONAL_ENVIRONMENT_FILTER"].append("os.*")
+        self.app.config["PROPAGATE_EXCEPTIONS"] = None
         assert exceptional.url == self.app.config["EXCEPTIONAL_DEBUG_URL"]
         
         with self.app.test_client() as client:

@@ -81,13 +81,15 @@ class Exceptional(object):
                     self.__protocol_version
                 )
             
-            app.handle_exception = self._get_exception_handler()
-            app.handle_http_exception = self._get_http_exception_handler()
-            
             if not hasattr(app, "extensions"):
                 app.extensions = {}
-    
-            app.extensions["exceptional"] = self
+            
+            if "exceptional" in app.extensions:
+                app.logger.warning("Repeated Exceptional initialization attempt.")
+            else:
+                app.handle_exception = self._get_exception_handler()
+                app.handle_http_exception = self._get_http_exception_handler()
+                app.extensions["exceptional"] = self
         else:
             app.logger.warning("Missing 'EXCEPTIONAL_API_KEY' configuration.")
     

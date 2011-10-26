@@ -241,7 +241,7 @@ http://status.getexceptional.com for details. Error data:\n%s" % (self.url, erro
 
         for name in os.environ:
             value = os.environ[name]
-            environment["os.%s" % name] = value
+            environment["os.%s" % name] = str(value)
 
         return {
             "framework": "flask",

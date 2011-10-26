@@ -27,7 +27,7 @@ class ExceptionalTestCase(unittest.TestCase):
         ret_val.testing = True
         ret_val.config["EXCEPTIONAL_API_KEY"] = "key"
         ret_val.config["EXCEPTIONAL_DEBUG_URL"] = environ.get("EXCEPTIONAL_DEBUG_URL",
-            "http://www.postbin.org/m7viy8")
+            "http://posttestserver.com/post.php")
         ret_val.config["PROPAGATE_EXCEPTIONS"] = False
 
         @ret_val.route("/error")

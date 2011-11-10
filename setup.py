@@ -25,7 +25,7 @@ else:
 
 setup(
     name='Flask-Exceptional',
-    version='0.4.6',
+    version='0.4.7',
     url='http://github.com/jzempel/flask-exceptional',
     license='BSD',
     author='Jonathan Zempel',

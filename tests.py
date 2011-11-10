@@ -13,6 +13,8 @@ from __future__ import with_statement
 from flask import abort, Flask, g, json
 from flaskext.exceptional import Exceptional
 from os import environ
+from sys import exc_info
+from werkzeug.debug.tbtools import Traceback
 import unittest
 
 class ExceptionalTestCase(unittest.TestCase):
@@ -160,6 +162,23 @@ class ExceptionalTestCase(unittest.TestCase):
             self.assertRaises(ZeroDivisionError, client.get, "/error")
             json.loads(g.exceptional)
             print "See %s for HTTP request details." % exceptional.url
+
+    def test_10_publish(self):
+        """Test direct exception publishing.
+        """
+        self.app = self.create_application()
+
+        try:
+            raise ValueError
+        except ValueError:
+            type, exception, traceback = exc_info()
+            traceback = Traceback(type, exception, traceback)
+
+        with self.app.test_request_context():
+            Exceptional.publish(self.app.config, traceback)
+            data = json.loads(g.exceptional)
+            exception = data["exception"]
+            assert exception["exception_class"] == ValueError.__name__
 
 if __name__ == "__main__":
     unittest.main()

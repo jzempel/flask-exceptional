@@ -94,6 +94,29 @@ class Exceptional(object):
             app.logger.warning("Missing 'EXCEPTIONAL_API_KEY' configuration.")
 
     @staticmethod
+    def publish(config, traceback):
+        """Publish the given traceback directly to Exceptional. This method is
+        useful for tracking errors that occur outside the context of a Flask
+        request. For example, this may be called from an asynchronous queue.
+
+        :param config: A Flask application configuration object. Accepts either
+                       :class:`flask.Config` or the object types allowed by
+                       :meth:`flask.Config.from_object`.
+        :param traceback: A :class:`werkzeug.debug.tbtools.Traceback` instance
+                          to publish.
+        """
+        app = Flask(__name__)
+        exceptional = Exceptional()
+
+        if isinstance(config, Config):
+            app.config = config
+        else:
+            app.config.from_object(config)
+
+        exceptional.init_app(app)
+        exceptional._post_data(traceback=traceback)
+
+    @staticmethod
     def test(config):
         """Test the given Flask configuration. If configured correctly,
         an error will be tracked by Exceptional for your app. Unlike
@@ -164,34 +187,44 @@ class Exceptional(object):
 
         return ret_val
 
-    def _post_data(self, context):
+    def _post_data(self, context=None, traceback=None):
         """POST data to the the Exceptional API. If DEBUG is True then data is
         sent to ``EXCEPTIONAL_DEBUG_URL`` if it has been defined. If TESTING is
         true, error data is stored in the global ``flask.g.exceptional`` variable.
 
-        :param context: The current application context.
+        :param context: Default ``None``. The current application context.
+        :param traceback: Default ``None``. The exception stack trace.
         """
+        app = context.app if context else self.app
+        application_data = self.__get_application_data(app)
         client_data = {
             "name": "flask-exceptional",
             "version": self.__version__,
             "protocol_version": self.__protocol_version
         }
-        traceback = tbtools.get_current_traceback()
+
+        if context:
+            request_data = self.__get_request_data(app, context.request, context.session)
+        else:
+            request_data = None
+
+        traceback = traceback or tbtools.get_current_traceback()
+        exception_data = self.__get_exception_data(traceback)
         error_data = json.dumps({
-            "application_environment": self.__get_application_data(context.app),
+            "application_environment": application_data,
             "client": client_data,
-            "request": self.__get_request_data(context.app, context.request, context.session),
-            "exception": self.__get_exception_data(traceback)
+            "request": request_data,
+            "exception": exception_data
         })
 
-        if context.app.testing:
+        if app.testing:
             g.exceptional = error_data
 
         if self.url:
             request = Request(self.url)
             request.add_header("Content-Type", "application/json")
 
-            if context.app.debug:
+            if app.debug:
                 data = error_data
             else:
                 request.add_header("Content-Encoding", "deflate")
@@ -212,7 +245,7 @@ http://status.getexceptional.com for details. Error data:\n%s" % (self.url, erro
     def __filter(app, data, filter_name):
         """Filter sensitive data.
         """
-        filter = app.config[filter_name]
+        filter = app.config.get(filter_name)
 
         if filter:
             ret_val = {}

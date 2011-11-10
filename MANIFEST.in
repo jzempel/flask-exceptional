@@ -1,4 +1,4 @@
-include LICENSE
+include CHANGES LICENSE
 recursive-include docs *
 recursive-exclude docs *.pyc
 recursive-exclude docs *.pyo

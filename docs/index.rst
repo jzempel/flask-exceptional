@@ -29,7 +29,7 @@ application, configure the Exceptional API key, and create the
 
     from flask import Flask
     from flaskext.exceptional import Exceptional
-    
+
     app = Flask(__name__)
     app.config["EXCEPTIONAL_API_KEY"] = "exceptional_forty_character_unique_key"
     exceptional = Exceptional(app)
@@ -54,7 +54,7 @@ The following configuration settings exist for Flask-Exceptional:
                                     select your app, and click the *APP
                                     SETTINGS* link. The displayed API key
                                     is the value to use here.
-                                    
+
                                     Attempting to create the extension
                                     without supplying an API key will
                                     result in a logged warning, but the
@@ -70,17 +70,17 @@ The following configuration settings exist for Flask-Exceptional:
                                     data to be compressed.
 `EXCEPTIONAL_HTTP_CODES`            A list of codes for HTTP errors that
                                     will be tracked with Exceptional.
-                                    
+
                                     Defaults to standard HTTP 4xx codes.
 `EXCEPTIONAL_PARAMETER_FILTER`      A list of values to filter from the
                                     parameter data sent to Exceptional.
                                     Parameter data includes everything
                                     in ``request.form`` and
                                     ``request.files``.
-                                    
+
                                     For example, to filter passwords you
                                     might use:
-                                    
+
                                     ``['password', 'password_confirm']``
 `EXCEPTIONAL_ENVIRONMENT_FILTER`    A list of values to filter from the
                                     environment data sent to Exceptional.
@@ -88,13 +88,13 @@ The following configuration settings exist for Flask-Exceptional:
                                     Flask application config plus the
                                     current OS environment. OS environment
                                     values are prefixed by ``'os.'``.
-                                    
+
                                     For example, to filter the SQL
                                     Alchemy database URI and all OS
                                     environment values, use:
-                                    
+
                                     ``['SQLALCHEMY_DATABASE_URI', 'os.*']``
-                                    
+
                                     Defaults to ``['SECRET_KEY']``
 `EXCEPTIONAL_SESSION_FILTER`        A list of values to filter from the
                                     session data sent to Exceptional.
@@ -109,11 +109,12 @@ The following configuration settings exist for Flask-Exceptional:
           expression patterns.
 
 API
-___
+---
 
 .. autoclass:: Exceptional
    :members:
 
+.. include:: ../CHANGES
 
 .. _Exceptional: http://www.getexceptional.com/
 .. _Flask: http://flask.pocoo.org/

@@ -1,0 +1,63 @@
+Changelog
+---------
+
+Version 0.4.7
+^^^^^^^^^^^^^
+
+* Added the :meth:`Exceptional.publish` method to support Exceptional tracking
+  outside the context of a request.
+
+Version 0.4.6
+^^^^^^^^^^^^^
+
+* Corrected ``occurred_at`` timestamp to be formatted as Zulu.
+* Fixed JSON serialization issue by coercing all environment variables to
+  strings.
+
+Version 0.4.5
+^^^^^^^^^^^^^
+
+* Updated to log a warning on repeated extension initialization attempts.
+
+Version 0.4.4
+^^^^^^^^^^^^^
+
+* Fixed to workaround Python 2.5 issue where :meth:`urlopen` raises a
+  :class:`HTTPError` even though the HTTP response code indicates success.
+
+Version 0.4.3
+^^^^^^^^^^^^^
+
+* Changed so that ``app.extensions['exceptional']`` targets the
+  :class:`Exceptional` extension instance.
+
+Version 0.4.2
+^^^^^^^^^^^^^
+
+* Updated to support Python 2.5.
+
+Version 0.4.1
+^^^^^^^^^^^^^
+
+* Updated to support Flask 0.7 blueprints.
+
+Version 0.4
+^^^^^^^^^^^
+
+* Updated to support Python 2.6.
+* Added `EXCEPTIONAL_DEBUG_URL` testing environment variable override.
+
+Version 0.3
+^^^^^^^^^^^
+
+* Updated to handle unreachable Exceptional service API.
+
+Version 0.2
+^^^^^^^^^^^
+
+* Added :meth:`Exceptional.test` method.
+
+Version 0.1
+^^^^^^^^^^^
+
+* Initial public release.

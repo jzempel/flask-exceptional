@@ -210,12 +210,26 @@ class Exceptional(object):
 
         traceback = traceback or tbtools.get_current_traceback()
         exception_data = self.__get_exception_data(traceback)
-        error_data = json.dumps({
-            "application_environment": application_data,
-            "client": client_data,
-            "request": request_data,
-            "exception": exception_data
-        })
+        encode_basestring = json.encoder.encode_basestring
+
+        def _encode_basestring(value):
+            if isinstance(value, str) and json.encoder.HAS_UTF8.search(value) is not None:
+                value = value.decode("utf-8", "replace") # ensure the decode succeeds.
+
+            replace = lambda match: json.encoder.ESCAPE_DCT[match.group(0)]
+
+            return u'"%s"' % json.encoder.ESCAPE.sub(replace, value)
+
+        try:
+            json.encoder.encode_basestring = _encode_basestring
+            error_data = json.dumps({
+                "application_environment": application_data,
+                "client": client_data,
+                "request": request_data,
+                "exception": exception_data
+            }, ensure_ascii=False).encode("utf-8")
+        finally:
+            json.encoder.encode_basestring = encode_basestring
 
         if app.testing:
             g.exceptional = error_data
@@ -310,7 +324,11 @@ http://status.getexceptional.com for details. Error data:\n%s" % (self.url, erro
     def __get_request_data(app, request, session):
         """Get request data.
         """
-        parameters = {}
+        try:
+            parameters = request.json or {}
+        except:
+            parameters = {"INVALID_JSON": request.data}
+
         form = request.form.to_dict(flat=False)
 
         for key, value in form.iteritems():

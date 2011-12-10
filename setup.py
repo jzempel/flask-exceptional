@@ -19,13 +19,13 @@ from setuptools import setup
 from sys import version_info
 
 if version_info < (2, 6):
-    install_requires = ['Flask', 'simplejson']
+    install_requires = ['Flask', 'simplejson >= 1.9.1']
 else:
     install_requires = ['Flask']
 
 setup(
     name='Flask-Exceptional',
-    version='0.4.7',
+    version='0.4.8',
     url='http://github.com/jzempel/flask-exceptional',
     license='BSD',
     author='Jonathan Zempel',

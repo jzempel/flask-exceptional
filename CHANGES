@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+Version 0.4.8
+^^^^^^^^^^^^^
+
+* Updated to publish UTF-8 encoded data to Exceptional.
+* Added support for ``request.json`` data.
+
 Version 0.4.7
 ^^^^^^^^^^^^^
 

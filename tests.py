@@ -180,6 +180,44 @@ class ExceptionalTestCase(unittest.TestCase):
             exception = data["exception"]
             assert exception["exception_class"] == ValueError.__name__
 
+    def test_11_utf8_decode(self):
+        """Test sending an invalid UTF-8 byte sequence through Exceptional.
+        """
+        self.app.config["INVALID_UTF-8"] = "\xf0"
+        Exceptional(self.app)
+
+        with self.app.test_client() as client:
+            client.get("/error")
+            data = json.loads(g.exceptional)
+            application_environment = data["application_environment"]
+            environment = application_environment["env"]
+            assert environment["INVALID_UTF-8"] == u"\ufffd"
+
+    def test_12_json(self):
+        """Test JSON request handling.
+        """
+        self.app = self.create_application()
+        Exceptional(self.app)
+        data = json.dumps({"foo": {"bar": "baz"}})
+
+        with self.app.test_client() as client:
+            client.post("/error", content_type="application/json", data=data)
+            data = json.loads(g.exceptional)
+            request = data["request"]
+            parameters = request["parameters"]
+            assert "bar" in parameters["foo"]
+
+    def test_13_invalid_json(self):
+        """Test invalid JSON request handling.
+        """
+        data = '{"foo": {"bar": invalid}}'
+
+        with self.app.test_client() as client:
+            client.post("/error", content_type="application/json", data=data)
+            data = json.loads(g.exceptional)
+            request = data["request"]
+            parameters = request["parameters"]
+            assert "INVALID_JSON" in parameters
+
 if __name__ == "__main__":
     unittest.main()
-

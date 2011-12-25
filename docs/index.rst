@@ -63,11 +63,11 @@ The following configuration settings exist for Flask-Exceptional:
                                     errors are not tracked with
                                     Exceptional. Configure this value to
                                     capture error data in debug mode. For
-                                    example, you may use a `PostBin`_ URL
-                                    to debug your application. JSON error
-                                    data is POSTed uncompressed to this
-                                    URL, whereas Exceptional requires the
-                                    data to be compressed.
+                                    example, you may use a `RequestBin`_
+                                    URL to debug your application. JSON
+                                    error data is POSTed uncompressed to
+                                    this URL, whereas Exceptional requires
+                                    the data to be compressed.
 `EXCEPTIONAL_HTTP_CODES`            A list of codes for HTTP errors that
                                     will be tracked with Exceptional.
 
@@ -118,4 +118,4 @@ API
 
 .. _Exceptional: http://www.getexceptional.com/
 .. _Flask: http://flask.pocoo.org/
-.. _PostBin: http://www.postbin.org/
+.. _RequestBin: http://requestb.in/

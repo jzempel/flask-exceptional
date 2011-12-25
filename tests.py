@@ -10,10 +10,12 @@
 """
 
 from __future__ import with_statement
+from contextlib import closing
 from flask import abort, Flask, g, json
 from flaskext.exceptional import Exceptional
 from os import environ
 from sys import exc_info
+from urllib2 import urlopen
 from werkzeug.debug.tbtools import Traceback
 import unittest
 
@@ -21,15 +23,22 @@ class ExceptionalTestCase(unittest.TestCase):
     """Exceptional extension test cases.
     """
 
+    debug_url = environ.get("EXCEPTIONAL_DEBUG_URL")
+
     @staticmethod
     def create_application():
         """Create a test Flask application.
         """
+        if not ExceptionalTestCase.debug_url:
+            with closing(urlopen("http://requestb.in/api/v1/bins", '')) as response:
+                document = json.load(response)
+                ExceptionalTestCase.debug_url = "http://requestb.in/%s" % \
+                    document["name"]
+
         ret_val = Flask(__name__)
         ret_val.testing = True
         ret_val.config["EXCEPTIONAL_API_KEY"] = "key"
-        ret_val.config["EXCEPTIONAL_DEBUG_URL"] = environ.get("EXCEPTIONAL_DEBUG_URL",
-            "http://posttestserver.com/post.php")
+        ret_val.config["EXCEPTIONAL_DEBUG_URL"] = ExceptionalTestCase.debug_url
         ret_val.config["PROPAGATE_EXCEPTIONS"] = False
 
         @ret_val.route("/error")

@@ -24,6 +24,7 @@ import sys
 
 EXCEPTIONAL_URL = "http://api.getexceptional.com/api/errors"
 
+
 class Exceptional(object):
     """Extension for tracking application errors with Exceptional.
     Errors are not tracked if DEBUG is True. The application will
@@ -62,13 +63,15 @@ class Exceptional(object):
 
         if "EXCEPTIONAL_API_KEY" in app.config:
             app.config.setdefault("EXCEPTIONAL_COOKIE_FILTER", None)
-            app.config.setdefault("EXCEPTIONAL_ENVIRONMENT_FILTER", ["SECRET_KEY"])
+            app.config.setdefault("EXCEPTIONAL_ENVIRONMENT_FILTER",
+                    ["SECRET_KEY"])
             app.config.setdefault("EXCEPTIONAL_HEADER_FILTER", None)
             app.config.setdefault("EXCEPTIONAL_PARAMETER_FILTER", None)
             app.config.setdefault("EXCEPTIONAL_SESSION_FILTER", None)
-            app.config.setdefault("EXCEPTIONAL_HTTP_CODES", set(xrange(400, 418)))
+            app.config.setdefault("EXCEPTIONAL_HTTP_CODES",
+                    set(xrange(400, 418)))
             app.config.setdefault("EXCEPTIONAL_DEBUG_URL", None)
-            self.__protocol_version = 5 # Using zlib compression.
+            self.__protocol_version = 5  # Using zlib compression.
 
             if app.debug:
                 self.url = app.config["EXCEPTIONAL_DEBUG_URL"]
@@ -190,7 +193,8 @@ class Exceptional(object):
     def _post_data(self, context=None, traceback=None):
         """POST data to the the Exceptional API. If DEBUG is True then data is
         sent to ``EXCEPTIONAL_DEBUG_URL`` if it has been defined. If TESTING is
-        true, error data is stored in the global ``flask.g.exceptional`` variable.
+        true, error data is stored in the global ``flask.g.exceptional``
+        variable.
 
         :param context: Default ``None``. The current application context.
         :param traceback: Default ``None``. The exception stack trace.
@@ -204,7 +208,8 @@ class Exceptional(object):
         }
 
         if context:
-            request_data = self.__get_request_data(app, context.request, context.session)
+            request_data = self.__get_request_data(app, context.request,
+                    context.session)
         else:
             request_data = None
 
@@ -213,8 +218,10 @@ class Exceptional(object):
         encode_basestring = json.encoder.encode_basestring
 
         def _encode_basestring(value):
-            if isinstance(value, str) and json.encoder.HAS_UTF8.search(value) is not None:
-                value = value.decode("utf-8", "replace") # ensure the decode succeeds.
+            if isinstance(value, str) and \
+                    json.encoder.HAS_UTF8.search(value) is not None:
+                value = value.decode("utf-8",
+                        "replace")  # ensure the decode succeeds.
 
             replace = lambda match: json.encoder.ESCAPE_DCT[match.group(0)]
 
@@ -292,7 +299,8 @@ http://status.getexceptional.com for details. Error data:\n%s" % (self.url, erro
 
         return {
             "framework": "flask",
-            "env": Exceptional.__filter(app, environment, "EXCEPTIONAL_ENVIRONMENT_FILTER"),
+            "env": Exceptional.__filter(app, environment,
+                "EXCEPTIONAL_ENVIRONMENT_FILTER"),
             "language": "python",
             "language_version": sys.version.replace('\n', ''),
             "application_root_directory": app.root_path
@@ -346,8 +354,9 @@ http://status.getexceptional.com for details. Error data:\n%s" % (self.url, erro
                 parameters[key] = [file.filename for file in value]
 
         if request.cookies:
-            cookies = Exceptional.__filter(app, request.cookies, "EXCEPTIONAL_COOKIE_FILTER")
-            headers = Headers(request.headers) # Get a mutable dictionary.
+            cookies = Exceptional.__filter(app, request.cookies,
+                    "EXCEPTIONAL_COOKIE_FILTER")
+            headers = Headers(request.headers)  # Get a mutable dictionary.
             cookie = SimpleCookie()
 
             for key, value in cookies.iteritems():
@@ -358,12 +367,17 @@ http://status.getexceptional.com for details. Error data:\n%s" % (self.url, erro
             headers = request.headers
 
         return {
-            "session": Exceptional.__filter(app, session, "EXCEPTIONAL_SESSION_FILTER"),
+            "session": Exceptional.__filter(app, session,
+                "EXCEPTIONAL_SESSION_FILTER"),
             "remote_ip": request.remote_addr,
-            "parameters": Exceptional.__filter(app, parameters, "EXCEPTIONAL_PARAMETER_FILTER"),
-            "action": request.endpoint.split('.', 1)[-1] if request.endpoint else None,
+            "parameters": Exceptional.__filter(app, parameters,
+                "EXCEPTIONAL_PARAMETER_FILTER"),
+            "action": request.endpoint.split('.', 1)[-1] if request.endpoint \
+                    else None,
             "url": request.url,
             "request_method": request.method,
-            "controller": request.blueprint if hasattr(request, "blueprint") else request.module,
-            "headers": Exceptional.__filter(app, headers, "EXCEPTIONAL_HEADER_FILTER")
+            "controller": request.blueprint if hasattr(request, "blueprint") \
+                    else request.module,
+            "headers": Exceptional.__filter(app, headers,
+                "EXCEPTIONAL_HEADER_FILTER")
         }

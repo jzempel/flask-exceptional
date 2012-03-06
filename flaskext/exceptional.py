@@ -22,7 +22,7 @@ from zlib import compress
 import os
 import sys
 
-EXCEPTIONAL_URL = "http://api.getexceptional.com/api/errors"
+EXCEPTIONAL_URL = "http://api.exceptional.io/api/errors"
 
 
 class Exceptional(object):
@@ -287,7 +287,7 @@ class Exceptional(object):
                         raise
             except URLError:
                 message = "Unable to connect to %s. See \
-http://status.getexceptional.com for details. Error data:\n%s" % (self.url, error_data)
+http://status.exceptional.io for details. Error data:\n%s" % (self.url, error_data)
                 self.app.logger.warning(message, exc_info=True)
 
     @staticmethod

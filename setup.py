@@ -11,7 +11,7 @@ Links
 * `development version
   <http://github.com/jzempel/flask-exceptional/zipball/master#egg=Flask-Exceptional-dev>`_
 
-.. _Exceptional: http://www.getexceptional.com/
+.. _Exceptional: http://www.exceptional.io/
 
 """
 

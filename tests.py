@@ -59,7 +59,7 @@ class ExceptionalTestCase(unittest.TestCase):
 
     def test_01_exception(self):
         """Test mandatory data requirements for the Exceptional API.
-        See http://docs.getexceptional.com/api/publish for details.
+        See http://docs.exceptional.io/api/publish for details.
         """
         with self.app.test_client() as client:
             client.get("/error")

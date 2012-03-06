@@ -5,7 +5,7 @@ Flask-Exceptional
 
 Flask-Exceptional adds `Exceptional`_ support to `Flask`_. Exceptional
 tracks errors in your application, reports them real-time, and gathers
-the info you need to fix them fast. Visit http://www.getexceptional.com
+the info you need to fix them fast. Visit http://www.exceptional.io
 to give it a try.
 
 Installation
@@ -116,6 +116,6 @@ API
 
 .. include:: ../CHANGES
 
-.. _Exceptional: http://www.getexceptional.com/
+.. _Exceptional: http://www.exceptional.io/
 .. _Flask: http://flask.pocoo.org/
 .. _RequestBin: http://requestb.in/

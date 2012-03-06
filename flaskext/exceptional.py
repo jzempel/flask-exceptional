@@ -97,6 +97,27 @@ class Exceptional(object):
             app.logger.warning("Missing 'EXCEPTIONAL_API_KEY' configuration.")
 
     @staticmethod
+    def context(data=None, **kwargs):
+        """Add extra context data to the current tracked exception. The context
+        data is only valid for the current request. Multiple calls to this
+        method will update any existing context with new data.
+
+        :param data: Default ``None``. A dictionary of context data.
+        :param kwargs: A series of keyword arguments to use as context data.
+        """
+        context = getattr(_request_ctx_stack.top, "exceptional_context", None)
+
+        if context is None:
+            context = {}
+            setattr(_request_ctx_stack.top, "exceptional_context", context)
+
+        if data is not None:
+            context.update(data)
+
+        if len(kwargs):
+            context.update(kwargs)
+
+    @staticmethod
     def publish(config, traceback):
         """Publish the given traceback directly to Exceptional. This method is
         useful for tracking errors that occur outside the context of a Flask
@@ -130,6 +151,7 @@ class Exceptional(object):
                        Accepts either :class:`flask.Config` or the object
                        types allowed by :meth:`flask.Config.from_object`.
         """
+        context = getattr(_request_ctx_stack.top, "exceptional_context", None)
         app = Flask(__name__)
         exceptional = Exceptional()
 
@@ -146,6 +168,9 @@ class Exceptional(object):
 
         @app.route("/exception")
         def exception():
+            if context:
+                setattr(_request_ctx_stack.top, "exceptional_context", context)
+
             message = "Congratulations! Your application is configured for Exceptional error tracking."
 
             raise Exception(message)
@@ -210,8 +235,10 @@ class Exceptional(object):
         if context:
             request_data = self.__get_request_data(app, context.request,
                     context.session)
+            context_data = getattr(context, "exceptional_context", None)
         else:
             request_data = None
+            context_data = None
 
         traceback = traceback or tbtools.get_current_traceback()
         exception_data = self.__get_exception_data(traceback)
@@ -233,7 +260,8 @@ class Exceptional(object):
                 "application_environment": application_data,
                 "client": client_data,
                 "request": request_data,
-                "exception": exception_data
+                "exception": exception_data,
+                "context": context_data
             }, ensure_ascii=False).encode("utf-8")
         finally:
             json.encoder.encode_basestring = encode_basestring

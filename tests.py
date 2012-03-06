@@ -13,6 +13,7 @@ from __future__ import with_statement
 from contextlib import closing
 from flask import abort, Flask, g, json
 from flaskext.exceptional import Exceptional
+from functools import wraps
 from os import environ
 from sys import exc_info
 from urllib2 import urlopen
@@ -29,16 +30,11 @@ class ExceptionalTestCase(unittest.TestCase):
     def create_application():
         """Create a test Flask application.
         """
-        if not ExceptionalTestCase.debug_url:
-            with closing(urlopen("http://requestb.in/api/v1/bins", '')) as response:
-                document = json.load(response)
-                ExceptionalTestCase.debug_url = "http://requestb.in/%s" % \
-                    document["name"]
-
         ret_val = Flask(__name__)
         ret_val.testing = True
         ret_val.config["EXCEPTIONAL_API_KEY"] = "key"
-        ret_val.config["EXCEPTIONAL_DEBUG_URL"] = ExceptionalTestCase.debug_url
+        ret_val.config["EXCEPTIONAL_DEBUG_URL"] = environ.get("EXCEPTIONAL_DEBUG_URL",
+            "http://posttestserver.com/post.php")
         ret_val.config["PROPAGATE_EXCEPTIONS"] = False
 
         @ret_val.route("/error")
@@ -227,6 +223,38 @@ class ExceptionalTestCase(unittest.TestCase):
             request = data["request"]
             parameters = request["parameters"]
             assert "INVALID_JSON" in parameters
+
+    def test_14_context(self):
+        """Test exception context data.
+        """
+
+        def exception_handler(app):
+            handle_exception = app.handle_exception
+
+            @wraps(handle_exception)
+            def ret_val(exception):
+                Exceptional.context(foo="bar")
+
+                return handle_exception(exception)
+
+            return ret_val
+
+        handle_exception = self.app.handle_exception
+        self.app.handle_exception = exception_handler(self.app)
+
+        with self.app.test_client() as client:
+            client.get("/error")
+            data = json.loads(g.exceptional)
+            context = data["context"]
+            assert context["foo"] == "bar"
+
+        self.app.handle_exception = handle_exception
+
+        with self.app.test_client() as client:
+            client.get("/error")
+            data = json.loads(g.exceptional)
+            context = data["context"]
+            assert context == None
 
 if __name__ == "__main__":
     unittest.main()

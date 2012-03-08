@@ -168,9 +168,7 @@ class Exceptional(object):
 
         @app.route("/exception")
         def exception():
-            if context:
-                setattr(_request_ctx_stack.top, "exceptional_context", context)
-
+            setattr(_request_ctx_stack.top, "exceptional_context", context)
             message = "Congratulations! Your application is configured for Exceptional error tracking."
 
             raise Exception(message)

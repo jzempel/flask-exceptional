@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+Version 0.4.9
+^^^^^^^^^^^^^
+
+* Added the :meth:`Exceptional.context` method to support Exceptional's extra
+  context data API.
+* Updated to reference the new exceptional.io domain.
+
 Version 0.4.8
 ^^^^^^^^^^^^^
 

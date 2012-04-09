@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-    flaskext.exceptional
-    ~~~~~~~~~~~~~~~~~~~~
+    flask_exceptional
+    ~~~~~~~~~~~~~~~~~
 
     Adds Exceptional support to Flask.
 
-    :copyright: (c) 2011 by Jonathan Zempel.
+    :copyright: (c) 2012 by Jonathan Zempel.
     :license: BSD, see LICENSE for more details.
 """
 
 from __future__ import with_statement
 from Cookie import SimpleCookie
 from datetime import datetime
-from flask import _request_ctx_stack, Config, Flask, g, json
+from flask import Config, Flask, g, json
 from functools import wraps
 from re import match
 from urllib2 import HTTPError, Request, urlopen, URLError
@@ -21,6 +21,11 @@ from werkzeug.debug import tbtools
 from zlib import compress
 import os
 import sys
+
+try:
+    from flask import _app_ctx_stack as stack
+except ImportError:
+    from flask import _request_ctx_stack as stack
 
 EXCEPTIONAL_URL = "http://api.exceptional.io/api/errors"
 
@@ -40,8 +45,6 @@ class Exceptional(object):
         """
         if app is not None:
             self.init_app(app)
-        else:
-            self.app = None
 
     @property
     def __version__(self):
@@ -59,8 +62,6 @@ class Exceptional(object):
 
         :param app: The Flask application to track errors for.
         """
-        self.app = app
-
         if "EXCEPTIONAL_API_KEY" in app.config:
             app.config.setdefault("EXCEPTIONAL_COOKIE_FILTER", None)
             app.config.setdefault("EXCEPTIONAL_ENVIRONMENT_FILTER",
@@ -90,8 +91,8 @@ class Exceptional(object):
             if "exceptional" in app.extensions:
                 app.logger.warning("Repeated Exceptional initialization attempt.")
             else:
-                app.handle_exception = self._get_exception_handler()
-                app.handle_http_exception = self._get_http_exception_handler()
+                app.handle_exception = self._get_exception_handler(app)
+                app.handle_http_exception = self._get_http_exception_handler(app)
                 app.extensions["exceptional"] = self
         else:
             app.logger.warning("Missing 'EXCEPTIONAL_API_KEY' configuration.")
@@ -105,11 +106,11 @@ class Exceptional(object):
         :param data: Default ``None``. A dictionary of context data.
         :param kwargs: A series of keyword arguments to use as context data.
         """
-        context = getattr(_request_ctx_stack.top, "exceptional_context", None)
+        context = getattr(stack.top, "exceptional_context", None)
 
         if context is None:
             context = {}
-            setattr(_request_ctx_stack.top, "exceptional_context", context)
+            setattr(stack.top, "exceptional_context", context)
 
         if data is not None:
             context.update(data)
@@ -151,7 +152,7 @@ class Exceptional(object):
                        Accepts either :class:`flask.Config` or the object
                        types allowed by :meth:`flask.Config.from_object`.
         """
-        context = getattr(_request_ctx_stack.top, "exceptional_context", None)
+        context = getattr(stack.top, "exceptional_context", None)
         app = Flask(__name__)
         exceptional = Exceptional()
 
@@ -168,7 +169,7 @@ class Exceptional(object):
 
         @app.route("/exception")
         def exception():
-            setattr(_request_ctx_stack.top, "exceptional_context", context)
+            setattr(stack.top, "exceptional_context", context)
             message = "Congratulations! Your application is configured for Exceptional error tracking."
 
             raise Exception(message)
@@ -177,34 +178,38 @@ class Exceptional(object):
             client.get("/exception")
             json.loads(g.exceptional)
 
-    def _get_exception_handler(self):
+    def _get_exception_handler(self, app):
         """Get a wrapped exception handler. Returns a handler that can be
         used to override Flask's ``app.handle_exception``. The wrapped
         handler posts error data to Exceptional and then passes the exception
         to the wrapped method.
+
+        :param app: The app for which the exception handler is being wrapped.
         """
-        handle_exception = self.app.handle_exception
+        handle_exception = app.handle_exception
 
         @wraps(handle_exception)
         def ret_val(exception):
-            context = _request_ctx_stack.top
-            self._post_data(context)
+            self._post_data(stack.top)
 
             return handle_exception(exception)
 
         return ret_val
 
-    def _get_http_exception_handler(self):
+    def _get_http_exception_handler(self, app):
         """Get a wrapped HTTP exception handler. Returns a handler that can
         be used to override Flask's ``app.handle_http_exception``. The wrapped
         handler posts HTTP error (i.e. '400: Bad Request') data to Exceptional
         and then passes the exception to the wrapped method.
+
+        :param app: The app for which the HTTP exception handler is being
+            wrapped.
         """
-        handle_http_exception = self.app.handle_http_exception
+        handle_http_exception = app.handle_http_exception
 
         @wraps(handle_http_exception)
         def ret_val(exception):
-            context = _request_ctx_stack.top
+            context = stack.top
 
             if exception.code in context.app.config["EXCEPTIONAL_HTTP_CODES"]:
                 self._post_data(context)
@@ -222,7 +227,7 @@ class Exceptional(object):
         :param context: Default ``None``. The current application context.
         :param traceback: Default ``None``. The exception stack trace.
         """
-        app = context.app if context else self.app
+        app = context.app if context else stack.top.app
         application_data = self.__get_application_data(app)
         client_data = {
             "name": "flask-exceptional",
@@ -286,7 +291,7 @@ class Exceptional(object):
             except URLError:
                 message = "Unable to connect to %s. See \
 http://status.exceptional.io for details. Error data:\n%s" % (self.url, error_data)
-                self.app.logger.warning(message, exc_info=True)
+                stack.top.app.logger.warning(message, exc_info=True)
 
     @staticmethod
     def __filter(app, data, filter_name):

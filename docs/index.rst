@@ -1,7 +1,7 @@
 Flask-Exceptional
 =================
 
-.. module:: flaskext.exceptional
+.. module:: flask.ext.exceptional
 
 Flask-Exceptional adds `Exceptional`_ support to `Flask`_. Exceptional
 tracks errors in your application, reports them real-time, and gathers
@@ -28,7 +28,7 @@ application, configure the Exceptional API key, and create the
 :class:`Exceptional` object. It's this easy::
 
     from flask import Flask
-    from flaskext.exceptional import Exceptional
+    from flask.ext.exceptional import Exceptional
 
     app = Flask(__name__)
     app.config["EXCEPTIONAL_API_KEY"] = "exceptional_forty_character_unique_key"

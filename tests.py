@@ -12,13 +12,14 @@
 from __future__ import with_statement
 from contextlib import closing
 from flask import abort, Flask, g, json
-from flaskext.exceptional import Exceptional
+from flask.ext.exceptional import Exceptional
 from functools import wraps
 from os import environ
 from sys import exc_info
 from urllib2 import urlopen
 from werkzeug.debug.tbtools import Traceback
 import unittest
+
 
 class ExceptionalTestCase(unittest.TestCase):
     """Exceptional extension test cases.

@@ -25,15 +25,14 @@ else:
 
 setup(
     name='Flask-Exceptional',
-    version='0.4.9',
+    version='0.5',
     url='http://github.com/jzempel/flask-exceptional',
     license='BSD',
     author='Jonathan Zempel',
     author_email='jzempel@gmail.com',
     description='Adds Exceptional support to Flask applications',
     long_description=__doc__,
-    packages=['flaskext'],
-    namespace_packages=['flaskext'],
+    py_modules=['flask_exceptional'],
     zip_safe=False,
     platforms='any',
     install_requires=install_requires,

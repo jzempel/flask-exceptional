@@ -2,7 +2,7 @@ Changelog
 ---------
 
 Version 0.5
-~~~~~~~~~~~
+^^^^^^^^^^^
 
 * Updated with Flask 0.8 extension structure recommendations and 0.9
   _app_ctx_stack.

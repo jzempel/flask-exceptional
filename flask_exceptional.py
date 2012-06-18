@@ -27,6 +27,11 @@ try:
 except ImportError:
     from flask import _request_ctx_stack as stack  # NOQA
 
+try:
+    import pkg_resources
+except ImportError:
+    pkg_resources = None  # NOQA
+
 EXCEPTIONAL_URL = "http://api.exceptional.io/api/errors"
 
 
@@ -50,10 +55,9 @@ class Exceptional(object):
     def __version__(self):
         """Get the version for this extension.
         """
-        try:
-            resources = __import__("pkg_resources")
-            ret_val = resources.get_distribution("flask-exceptional").version
-        except Exception:
+        if pkg_resources:
+            ret_val = pkg_resources.get_distribution("flask-exceptional").version  # NOQA
+        else:
             ret_val = "unknown"
 
         return ret_val
@@ -329,13 +333,22 @@ class Exceptional(object):
             value = os.environ[name]
             environment["os.%s" % name] = str(value)
 
+        if pkg_resources:
+            modules = {}
+
+            for module in pkg_resources.working_set:
+                modules[module.project_name] = module.version
+        else:
+            modules = None
+
         return {
             "framework": "flask",
             "env": Exceptional.__filter(app, environment,
                 "EXCEPTIONAL_ENVIRONMENT_FILTER"),
             "language": "python",
             "language_version": sys.version.replace('\n', ''),
-            "application_root_directory": app.root_path
+            "application_root_directory": app.root_path,
+            "loaded_libraries": modules
         }
 
     @staticmethod

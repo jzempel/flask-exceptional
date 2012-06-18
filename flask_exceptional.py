@@ -25,7 +25,7 @@ import sys
 try:
     from flask import _app_ctx_stack as stack
 except ImportError:
-    from flask import _request_ctx_stack as stack
+    from flask import _request_ctx_stack as stack  # NOQA
 
 EXCEPTIONAL_URL = "http://api.exceptional.io/api/errors"
 
@@ -51,7 +51,8 @@ class Exceptional(object):
         """Get the version for this extension.
         """
         try:
-            ret_val = __import__("pkg_resources").get_distribution("flask-exceptional").version
+            resources = __import__("pkg_resources")
+            ret_val = resources.get_distribution("flask-exceptional").version
         except Exception:
             ret_val = "unknown"
 
@@ -89,10 +90,10 @@ class Exceptional(object):
                 app.extensions = {}
 
             if "exceptional" in app.extensions:
-                app.logger.warning("Repeated Exceptional initialization attempt.")
+                app.logger.warning("Repeated Exceptional initialization attempt.")  # NOQA
             else:
                 app.handle_exception = self._get_exception_handler(app)
-                app.handle_http_exception = self._get_http_exception_handler(app)
+                app.handle_http_exception = self._get_http_exception_handler(app)  # NOQA
                 app.extensions["exceptional"] = self
         else:
             app.logger.warning("Missing 'EXCEPTIONAL_API_KEY' configuration.")
@@ -170,7 +171,7 @@ class Exceptional(object):
         @app.route("/exception")
         def exception():
             setattr(stack.top, "exceptional_context", context)
-            message = "Congratulations! Your application is configured for Exceptional error tracking."
+            message = "Congratulations! Your application is configured for Exceptional error tracking."  # NOQA
 
             raise Exception(message)
 
@@ -289,9 +290,9 @@ class Exceptional(object):
                     if e.code >= 400:
                         raise
             except URLError:
-                message = "Unable to connect to %s. See \
-http://status.exceptional.io for details. Error data:\n%s" % (self.url, error_data)
-                stack.top.app.logger.warning(message, exc_info=True)
+                message = "Unable to connect to %s. See http://status.exceptional.io for details. Error data:\n%s"  # NOQA
+                stack.top.app.logger.warning(message, self.url, error_data,
+                        exc_info=True)
 
     @staticmethod
     def __filter(app, data, filter_name):

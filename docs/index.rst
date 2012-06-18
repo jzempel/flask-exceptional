@@ -12,13 +12,13 @@ Installation
 ------------
 
 The remaining documentation assumes you have access to an Exceptional
-account. Install the extension with one of the following commands::
-
-    $ easy_install Flask-Exceptional
-
-or alternatively if you have pip installed::
+account. Installing the extension is simple with pip::
 
     $ pip install Flask-Exceptional
+
+or alternatively with easy_install::
+
+    $ easy_install Flask-Exceptional
 
 Quickstart
 ----------

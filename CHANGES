@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+Version 0.5.1
+^^^^^^^^^^^^^
+
+* Handle malformed HTTP response status-line from Exceptional.
+
 Version 0.5
 ^^^^^^^^^^^
 

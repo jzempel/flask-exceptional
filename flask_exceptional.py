@@ -14,6 +14,7 @@ from Cookie import SimpleCookie
 from datetime import datetime
 from flask import Config, Flask, g, json
 from functools import wraps
+from httplib import BadStatusLine
 from re import match
 from urllib2 import HTTPError, Request, urlopen, URLError
 from werkzeug import Headers
@@ -297,6 +298,8 @@ class Exceptional(object):
                 message = "Unable to connect to %s. See http://status.exceptional.io for details. Error data:\n%s"  # NOQA
                 stack.top.app.logger.warning(message, self.url, error_data,
                         exc_info=True)
+            except BadStatusLine:
+                pass
 
     @staticmethod
     def __filter(app, data, filter_name):

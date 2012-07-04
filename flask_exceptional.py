@@ -12,7 +12,7 @@
 from __future__ import with_statement
 from Cookie import SimpleCookie
 from datetime import datetime
-from flask import Config, Flask, g, json
+from flask import _request_ctx_stack as stack, Config, Flask, g, json
 from functools import wraps
 from httplib import BadStatusLine
 from re import match
@@ -22,11 +22,6 @@ from werkzeug.debug import tbtools
 from zlib import compress
 import os
 import sys
-
-try:
-    from flask import _app_ctx_stack as stack
-except ImportError:
-    from flask import _request_ctx_stack as stack  # NOQA
 
 try:
     import pkg_resources
@@ -296,7 +291,7 @@ class Exceptional(object):
                         raise
             except URLError:
                 message = "Unable to connect to %s. See http://status.exceptional.io for details. Error data:\n%s"  # NOQA
-                stack.top.app.logger.warning(message, self.url, error_data,
+                app.logger.warning(message, self.url, error_data,
                         exc_info=True)
             except BadStatusLine:
                 pass

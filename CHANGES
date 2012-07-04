@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+Version 0.5.2
+^^^^^^^^^^^^^
+
+* Unwind broken _app_ctx_stack usage.
+
 Version 0.5.1
 ^^^^^^^^^^^^^
 

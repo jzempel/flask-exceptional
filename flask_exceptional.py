@@ -140,7 +140,8 @@ class Exceptional(object):
             app.config.from_object(config)
 
         exceptional.init_app(app)
-        exceptional._post_data(traceback=traceback)
+
+        return exceptional._post_data(app, traceback=traceback)
 
     @staticmethod
     def test(config):
@@ -219,16 +220,24 @@ class Exceptional(object):
 
         return ret_val
 
-    def _post_data(self, context=None, traceback=None):
+    def _post_data(self, context, traceback=None):
         """POST data to the the Exceptional API. If DEBUG is True then data is
         sent to ``EXCEPTIONAL_DEBUG_URL`` if it has been defined. If TESTING is
         true, error data is stored in the global ``flask.g.exceptional``
         variable.
 
-        :param context: Default ``None``. The current application context.
+        :param context: The current application or application context.
         :param traceback: Default ``None``. The exception stack trace.
         """
-        app = context.app if context else stack.top.app
+        if context:
+            if isinstance(context, Flask):
+                app = context
+                context = None
+            else:
+                app = context.app
+        else:
+            app = stack.top.app
+
         application_data = self.__get_application_data(app)
         client_data = {
             "name": "flask-exceptional",
@@ -260,7 +269,7 @@ class Exceptional(object):
 
         try:
             json.encoder.encode_basestring = _encode_basestring
-            error_data = json.dumps({
+            ret_val = json.dumps({
                 "application_environment": application_data,
                 "client": client_data,
                 "request": request_data,
@@ -270,18 +279,18 @@ class Exceptional(object):
         finally:
             json.encoder.encode_basestring = encode_basestring
 
-        if app.testing:
-            g.exceptional = error_data
+        if context and app.testing:
+            g.exceptional = ret_val
 
         if self.url:
             request = Request(self.url)
             request.add_header("Content-Type", "application/json")
 
             if app.debug:
-                data = error_data
+                data = ret_val
             else:
                 request.add_header("Content-Encoding", "deflate")
-                data = compress(error_data, 1)
+                data = compress(ret_val, 1)
 
             try:
                 try:
@@ -291,10 +300,12 @@ class Exceptional(object):
                         raise
             except URLError:
                 message = "Unable to connect to %s. See http://status.exceptional.io for details. Error data:\n%s"  # NOQA
-                app.logger.warning(message, self.url, error_data,
+                app.logger.warning(message, self.url, ret_val,
                         exc_info=True)
             except BadStatusLine:
                 pass
+
+        return ret_val
 
     @staticmethod
     def __filter(app, data, filter_name):
@@ -415,12 +426,12 @@ class Exceptional(object):
             "remote_ip": request.remote_addr,
             "parameters": Exceptional.__filter(app, parameters,
                 "EXCEPTIONAL_PARAMETER_FILTER"),
-            "action": request.endpoint.split('.', 1)[-1] if request.endpoint \
-                    else None,
+            "action": request.endpoint.split('.', 1)[-1] if request.endpoint
+                else None,
             "url": request.url,
             "request_method": request.method,
-            "controller": request.blueprint if hasattr(request, "blueprint") \
-                    else request.module,
+            "controller": request.blueprint if hasattr(request, "blueprint")
+                else request.module,
             "headers": Exceptional.__filter(app, headers,
                 "EXCEPTIONAL_HEADER_FILTER")
         }

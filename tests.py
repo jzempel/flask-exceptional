@@ -10,13 +10,11 @@
 """
 
 from __future__ import with_statement
-from contextlib import closing
 from flask import abort, Flask, g, json
 from flask.ext.exceptional import Exceptional
 from functools import wraps
 from os import environ
 from sys import exc_info
-from urllib2 import urlopen
 from werkzeug.debug.tbtools import Traceback
 import unittest
 
@@ -34,8 +32,8 @@ class ExceptionalTestCase(unittest.TestCase):
         ret_val = Flask(__name__)
         ret_val.testing = True
         ret_val.config["EXCEPTIONAL_API_KEY"] = "key"
-        ret_val.config["EXCEPTIONAL_DEBUG_URL"] = environ.get("EXCEPTIONAL_DEBUG_URL",
-            "http://posttestserver.com/post.php")
+        ret_val.config["EXCEPTIONAL_DEBUG_URL"] = environ.get(
+            "EXCEPTIONAL_DEBUG_URL", "http://posttestserver.com/post.php")
         ret_val.config["PROPAGATE_EXCEPTIONS"] = False
 
         @ret_val.route("/error")
@@ -71,7 +69,8 @@ class ExceptionalTestCase(unittest.TestCase):
             assert "message" in exception
             assert "occurred_at" in exception
             environment = data["application_environment"]
-            assert environment["application_root_directory"] == self.app.root_path
+            assert environment[
+                "application_root_directory"] == self.app.root_path
             assert "env" in environment
 
     def test_02_http_exception(self):
@@ -145,14 +144,14 @@ class ExceptionalTestCase(unittest.TestCase):
 
         with self.app.test_client() as client:
             client.get("/error")
-            assert hasattr(g, "exceptional") == False
+            assert hasattr(g, "exceptional") is False
 
     def test_08_http_unexceptional(self):
         """Test non-logged HTTP error code.
         """
         with self.app.test_client() as client:
             client.get("/http/500")
-            assert hasattr(g, "exceptional") == False
+            assert hasattr(g, "exceptional") is False
 
     def test_09_debug(self):
         """Test exception in debug mode.
@@ -180,11 +179,9 @@ class ExceptionalTestCase(unittest.TestCase):
             type, exception, traceback = exc_info()
             traceback = Traceback(type, exception, traceback)
 
-        with self.app.test_request_context():
-            Exceptional.publish(self.app.config, traceback)
-            data = json.loads(g.exceptional)
-            exception = data["exception"]
-            assert exception["exception_class"] == ValueError.__name__
+        data = json.loads(Exceptional.publish(self.app.config, traceback))
+        exception = data["exception"]
+        assert exception["exception_class"] == ValueError.__name__
 
     def test_11_utf8_decode(self):
         """Test sending an invalid UTF-8 byte sequence through Exceptional.
@@ -255,7 +252,7 @@ class ExceptionalTestCase(unittest.TestCase):
             client.get("/error")
             data = json.loads(g.exceptional)
             context = data["context"]
-            assert context == None
+            assert context is None
 
 if __name__ == "__main__":
     unittest.main()

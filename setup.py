@@ -16,16 +16,20 @@ Links
 """
 
 from setuptools import setup
-from sys import version_info
+from sys import argv, version_info
 
 if version_info < (2, 6):
     install_requires = ['Flask', 'simplejson >= 1.9.1']
 else:
     install_requires = ['Flask']
 
+if "develop" in argv:
+    install_requires.append('Sphinx')
+    install_requires.append('Sphinx-PyPI-upload')
+
 setup(
     name='Flask-Exceptional',
-    version='0.5.2',
+    version='0.5.3',
     url='http://github.com/jzempel/flask-exceptional',
     license='BSD',
     author='Jonathan Zempel',

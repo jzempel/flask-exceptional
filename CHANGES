@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+Version 0.5.3
+^^^^^^^^^^^^^
+
+* Fixed :meth:`Exceptional.publish` to no longer dereference a request context.
+
 Version 0.5.2
 ^^^^^^^^^^^^^
 

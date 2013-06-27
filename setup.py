@@ -29,7 +29,7 @@ if "develop" in argv:
 
 setup(
     name='Flask-Exceptional',
-    version='0.5.3',
+    version='0.5.4',
     url='http://github.com/jzempel/flask-exceptional',
     license='BSD',
     author='Jonathan Zempel',

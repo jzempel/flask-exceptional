@@ -12,7 +12,7 @@
 from __future__ import with_statement
 from Cookie import SimpleCookie
 from datetime import datetime
-from flask import _request_ctx_stack as stack, Config, Flask, g, json
+from flask import _request_ctx_stack as stack, Config, Flask, g
 from functools import wraps
 from httplib import BadStatusLine
 from re import match
@@ -22,6 +22,11 @@ from werkzeug.debug import tbtools
 from zlib import compress
 import os
 import sys
+
+try:
+    from flask.json import _json as json
+except ImportError:
+    from flask import json
 
 try:
     import pkg_resources

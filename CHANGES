@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+Version 0.5.4
+^^^^^^^^^^^^^
+
+* Updated JSON implementation import to work with Flask 0.10.
+
 Version 0.5.3
 ^^^^^^^^^^^^^
 
